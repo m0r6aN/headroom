@@ -666,6 +666,8 @@ def _register_cbm_mcp_server(cbm_bin: str) -> None:
         [claude_cli, "mcp", "get", _CBM_MCP_SERVER_NAME],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if check.returncode == 0:
         return  # Already registered
@@ -674,6 +676,8 @@ def _register_cbm_mcp_server(cbm_bin: str) -> None:
         [claude_cli, "mcp", "add", _CBM_MCP_SERVER_NAME, "-s", "user", "--", cbm_bin],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode == 0:
         click.echo(f"  Code graph: registered {_CBM_MCP_SERVER_NAME} MCP server")
@@ -727,6 +731,8 @@ def _setup_code_graph(verbose: bool = False) -> bool:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=30,
         )
         if result.returncode == 0:
@@ -1295,17 +1301,17 @@ def _inject_rtk_instructions(file_path: Path, verbose: bool = False) -> bool:
     Returns True if instructions were written.
     """
     if file_path.exists():
-        existing = file_path.read_text()
+        existing = file_path.read_text(encoding="utf-8")
         if _RTK_MARKER in existing:
             if verbose:
                 click.echo(f"  rtk instructions already in {file_path.name}")
             return True
         # Append to existing file
-        with open(file_path, "a") as f:
+        with open(file_path, "a", encoding="utf-8") as f:
             f.write("\n\n" + RTK_INSTRUCTIONS_BLOCK)
     else:
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(RTK_INSTRUCTIONS_BLOCK)
+        file_path.write_text(RTK_INSTRUCTIONS_BLOCK, encoding="utf-8")
 
     click.echo(f"  rtk instructions injected into {file_path}")
     return True
@@ -1379,14 +1385,14 @@ def _inject_memory_agents_md(file_path: Path) -> bool:
     )
 
     if file_path.exists():
-        existing = file_path.read_text()
+        existing = file_path.read_text(encoding="utf-8")
         if _MEMORY_AGENTS_MARKER in existing:
             return True  # Already injected
-        with open(file_path, "a") as f:
+        with open(file_path, "a", encoding="utf-8") as f:
             f.write("\n\n" + memory_block)
     else:
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_path.write_text(memory_block)
+        file_path.write_text(memory_block, encoding="utf-8")
 
     click.echo(f"  Memory guidance injected into {file_path.name}")
     return True
@@ -2709,6 +2715,8 @@ def claude(
                 ],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=30,
             )
             if sync_result.returncode == 0 and sync_result.stdout.strip():
